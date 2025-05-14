@@ -1,8 +1,9 @@
 use std::io::Result;
 
-use actix_web::{App, HttpServer};
+use actix_web::{App, HttpServer, web::Data};
 use sqlx::postgres::PgPoolOptions;
 
+pub mod comparison;
 pub mod game;
 pub mod index;
 
@@ -16,9 +17,11 @@ async fn main() -> Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .app_data(pool.clone())
-            .service(index::xindex)
-            .service(index::xdeal_hand)
+            .app_data(Data::new(pool.clone()))
+            .service(index::index)
+            .service(index::deal)
+            .service(index::history)
+            .service(index::generate_two_and_compare)
     })
     .bind("localhost:8080")
     .expect("Must be able to bind server")
