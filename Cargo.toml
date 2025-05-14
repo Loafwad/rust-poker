@@ -4,8 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+sqlx = { version = "0.8.5", features = ["postgres", "runtime-tokio"] }
 actix-web = "4.11.0"
-maud = "0.27.0"
+maud = { version = "0.27.0", features = ["actix-web"] }
 serde = "1.0.219"
-sqlx = "0.8.5"
 tokio = "1.45.0"
+rand = "0.9.1"
