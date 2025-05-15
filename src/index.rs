@@ -95,17 +95,13 @@ pub async fn deal(pool: web::Data<sqlx::PgPool>) -> Result<Markup, Error> {
     // TODO: Handle error properly
     .map_err(ErrorInternalServerError)?;
 
-    let hand = xhand(&hand).await;
+    let hand = xhand(&hand);
 
-    match hand {
-        Ok(markup) => Ok(markup),
-        Err(e) => Err(e),
-    }
+    Ok(hand)
 }
 
-// TODO: fix unecessary async
-pub async fn xhand(hand: &Hand) -> Result<Markup, Error> {
-    Ok(html! {
+pub fn xhand(hand: &Hand) -> Markup {
+    html! {
         p { "You have: " }
         ul {
             @for card in hand.cards.iter() {
@@ -113,7 +109,7 @@ pub async fn xhand(hand: &Hand) -> Result<Markup, Error> {
             }
         }
         p { "Hand Type: " (hand.evaluate()) }
-    })
+    }
 }
 
 struct HistoryView {
@@ -162,18 +158,18 @@ pub async fn generate_two_and_compare(_req: HttpRequest) -> Result<Markup, Error
         std::cmp::Ordering::Equal => "It's a tie!",
     };
 
-    let hand1 = xhand(&hand1).await;
-    let hand2 = xhand(&hand2).await;
+    let hand1 = xhand(&hand1);
+    let hand2 = xhand(&hand2);
 
     Ok(html! {
         p { (winner) }
         div {
             h3 { "Hand 1" }
-            (hand1.unwrap())
+            (hand1)
         }
         div {
             h3 { "Hand 2" }
-            (hand2.unwrap())
+            (hand2)
         }
     })
 }
