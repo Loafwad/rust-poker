@@ -154,19 +154,13 @@ impl Hand {
     }
 
     pub fn get_kickers_descending(&self, n: u32) -> Vec<u32> {
-        let rank_counts = self.get_rank_counts();
+        let excluded_ranks = self.get_n_of_a_kind(n);
 
-        let excluded_ranks: Vec<u32> = rank_counts
+        let mut kickers: Vec<u32> = self
+            .cards
             .iter()
-            .filter(|&rank_count| rank_count.count == n)
-            .map(|rank_count| rank_count.rank)
-            .collect();
-
-        // Filter out the excluded ranks
-        let mut kickers: Vec<u32> = rank_counts
-            .iter()
-            .filter(|&rank_count| !excluded_ranks.contains(&rank_count.rank))
-            .map(|rank_count| rank_count.rank)
+            .filter(|card| !excluded_ranks.contains(&card.rank.value()))
+            .map(|card| card.rank.value())
             .collect();
 
         kickers.sort_by(|a, b| b.cmp(a));
@@ -259,13 +253,7 @@ pub fn generate_hand() -> Hand {
     let cards: Vec<Card> = deck.iter().take(HAND_SIZE).cloned().collect();
 
     Hand {
-        // TODO: Can panic!
-        cards: cards.try_into().unwrap_or_else(|hand: Vec<Card>| {
-            panic!(
-                "Expected a Vec of length {} but found {}",
-                HAND_SIZE,
-                hand.len()
-            )
-        }),
+        // Should be safe? Because we know that we are only taking 5 cards
+        cards: cards.try_into().unwrap(),
     }
 }
