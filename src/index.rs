@@ -25,7 +25,6 @@ pub async fn xindex() -> Result<Markup, Error> {
             head {
                 title { "Poker" }
                 script src="https://unpkg.com/htmx.org@2.0.4" {}
-                script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js" {}
             }
             body {
                 h1 { "Welcome to Poker!" }

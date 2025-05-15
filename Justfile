@@ -7,3 +7,7 @@ start-db:
         postgres
 run:
     cargo run --release
+
+test: 
+    cargo test --release
+    

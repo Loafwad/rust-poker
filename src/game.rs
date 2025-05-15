@@ -313,3 +313,64 @@ pub fn generate_hand() -> Hand {
         cards: cards.try_into().unwrap(),
     }
 }
+
+// Tests :)
+#[test]
+fn test_normal_straight() {
+    let hand = Hand {
+        cards: [
+            Card {
+                rank: Rank::Two,
+                suit: Suit::Clubs,
+            },
+            Card {
+                rank: Rank::Three,
+                suit: Suit::Hearts,
+            },
+            Card {
+                rank: Rank::Four,
+                suit: Suit::Spades,
+            },
+            Card {
+                rank: Rank::Five,
+                suit: Suit::Diamonds,
+            },
+            Card {
+                rank: Rank::Six,
+                suit: Suit::Hearts,
+            },
+        ],
+    };
+
+    assert_eq!(hand.evaluate(), HandKind::Straight);
+}
+
+#[test]
+fn test_wheel_straight() {
+    let hand = Hand {
+        cards: [
+            Card {
+                rank: Rank::Ace,
+                suit: Suit::Clubs,
+            },
+            Card {
+                rank: Rank::Two,
+                suit: Suit::Hearts,
+            },
+            Card {
+                rank: Rank::Three,
+                suit: Suit::Spades,
+            },
+            Card {
+                rank: Rank::Four,
+                suit: Suit::Diamonds,
+            },
+            Card {
+                rank: Rank::Five,
+                suit: Suit::Hearts,
+            },
+        ],
+    };
+
+    assert_eq!(hand.evaluate(), HandKind::Straight);
+}
