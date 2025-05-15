@@ -5,3 +5,5 @@ start-db:
         -e POSTGRES_PASSWORD=password \
         -v ./migrations:/docker-entrypoint-initdb.d \
         postgres
+run:
+    cargo run --release
