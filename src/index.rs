@@ -103,6 +103,7 @@ pub async fn deal(pool: web::Data<sqlx::PgPool>) -> Result<Markup, Error> {
     }
 }
 
+// TODO: fix unecessary async
 pub async fn xhand(hand: &Hand) -> Result<Markup, Error> {
     Ok(html! {
         p { "You have: " }

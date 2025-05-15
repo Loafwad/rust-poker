@@ -113,13 +113,19 @@ impl Display for HandKind {
     }
 }
 
+// Represents the number of cards in hand of a given rank
+pub struct RankCount {
+    rank: u32,
+    count: u32,
+}
+
 #[derive(Debug, Serialize, Clone)]
 pub struct Hand {
     pub cards: [Card; HAND_SIZE],
 }
 
 impl Hand {
-    pub fn rank_counts(&self) -> Vec<(u32, u32)> {
+    pub fn get_rank_counts(&self) -> Vec<RankCount> {
         let mut counts = std::collections::HashMap::new();
 
         for card in &self.cards {
@@ -127,38 +133,48 @@ impl Hand {
             *counts.entry(rank_value).or_insert(0) += 1;
         }
 
-        let mut counts: Vec<(u32, u32)> = counts
+        let mut counts: Vec<RankCount> = counts
             .into_iter()
-            .map(|(rank, count)| (count, rank))
+            .map(|(rank, count)| RankCount { rank, count })
             .collect();
 
-        counts.sort_by(|a, b| b.0.cmp(&a.0).then(b.1.cmp(&a.1))); // count desc, rank desc
+        counts.sort_by(|a, b| b.count.cmp(&a.count));
         counts
+    }
+
+    /**
+     * Returns the ranks of the cards that have exactly n occurrences in the hand.
+     */
+    pub fn get_n_of_a_kind(&self, n: u32) -> Vec<u32> {
+        self.get_rank_counts()
+            .iter()
+            .filter(|&rank_count| rank_count.count == n)
+            .map(|rank_count| rank_count.rank)
+            .collect()
+    }
+
+    pub fn get_kickers_descending(&self, n: u32) -> Vec<u32> {
+        let rank_counts = self.get_rank_counts();
+
+        let excluded_ranks: Vec<u32> = rank_counts
+            .iter()
+            .filter(|&rank_count| rank_count.count == n)
+            .map(|rank_count| rank_count.rank)
+            .collect();
+
+        // Filter out the excluded ranks
+        let mut kickers: Vec<u32> = rank_counts
+            .iter()
+            .filter(|&rank_count| !excluded_ranks.contains(&rank_count.rank))
+            .map(|rank_count| rank_count.rank)
+            .collect();
+
+        kickers.sort_by(|a, b| b.cmp(a));
+        kickers
     }
 
     pub fn get_highest_card(&self) -> Option<u32> {
         self.cards.iter().map(|card| card.rank.value()).max()
-    }
-
-    pub fn get_n_of_a_kind(&self, n: u32) -> Option<u32> {
-        self.rank_counts()
-            .iter()
-            .find(|(count, _)| *count == n)
-            .map(|(_, rank)| *rank)
-    }
-
-    pub fn sorted_cards(&self) -> Vec<u32> {
-        let mut sorted: Vec<u32> = self.cards.iter().map(|card| card.rank.value()).collect();
-        sorted.sort_unstable();
-        sorted
-    }
-
-    pub fn highest_unique_card(&self) -> Option<u32> {
-        let counts = self.rank_counts();
-        counts
-            .iter()
-            .find(|(count, _)| *count == 1)
-            .map(|(_, rank)| *rank)
     }
 
     pub fn is_flush(&self) -> bool {
@@ -187,7 +203,7 @@ impl Hand {
         let mut ranks: Vec<u32> = self.cards.iter().map(|card| card.rank.value()).collect();
         ranks.sort_unstable();
 
-        let counts: Vec<u32> = self.rank_counts().iter().map(|&(count, _)| count).collect();
+        let counts: Vec<u32> = self.get_rank_counts().iter().map(|rc| rc.count).collect();
 
         let mut sorted = counts.clone();
         sorted.sort_by(|a, b| b.cmp(a));
