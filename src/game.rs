@@ -1,10 +1,12 @@
-use std::fmt::{Display, Formatter, Result};
+use core::fmt;
+use std::fmt::{Display, Formatter};
 
+use actix_web::{Error, error::ErrorInternalServerError};
 use rand::seq::SliceRandom;
 use serde::Serialize;
 use sqlx::Type;
 
-const HAND_SIZE: usize = 5;
+pub const HAND_SIZE: usize = 5;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct Card {
@@ -13,8 +15,50 @@ pub struct Card {
 }
 
 impl Display for Card {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{:?} of {:?}", self.rank, self.suit)
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}{:?}", self.rank.char(), self.suit.char())
+    }
+}
+
+impl Card {
+    /**
+     * E.g "Nine of Hearts", "Ace of Spades", etc.
+     */
+    pub fn to_label(&self) -> String {
+        format!("{:?} of {:?}", self.rank, self.suit)
+    }
+
+    pub fn from_string(s: &str) -> Result<Card, Error> {
+        if s.len() != 2 {
+            return Err(ErrorInternalServerError("Invalid card string length"));
+        }
+
+        let rank = match s.chars().nth(0).unwrap() {
+            '2' => Rank::Two,
+            '3' => Rank::Three,
+            '4' => Rank::Four,
+            '5' => Rank::Five,
+            '6' => Rank::Six,
+            '7' => Rank::Seven,
+            '8' => Rank::Eight,
+            '9' => Rank::Nine,
+            'T' => Rank::Ten,
+            'J' => Rank::Jack,
+            'Q' => Rank::Queen,
+            'K' => Rank::King,
+            'A' => Rank::Ace,
+            _ => return Err(ErrorInternalServerError("Invalid rank character")),
+        };
+
+        let suit = match s.chars().nth(1).unwrap() {
+            'h' => Suit::Hearts,
+            's' => Suit::Spades,
+            'd' => Suit::Diamonds,
+            'c' => Suit::Clubs,
+            _ => return Err(ErrorInternalServerError("Invalid suit character")),
+        };
+
+        Ok(Card { rank, suit })
     }
 }
 
@@ -108,7 +152,7 @@ pub enum HandKind {
 }
 
 impl Display for HandKind {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }
@@ -122,6 +166,18 @@ pub struct RankCount {
 #[derive(Debug, Serialize, Clone)]
 pub struct Hand {
     pub cards: [Card; HAND_SIZE],
+}
+
+impl Display for Hand {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let cards = self
+            .cards
+            .iter()
+            .map(|card| card.rank.char().to_string() + &card.suit.char().to_string())
+            .collect::<Vec<_>>()
+            .join(", ");
+        write!(f, "{}", cards)
+    }
 }
 
 impl Hand {

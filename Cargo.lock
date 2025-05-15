@@ -1266,6 +1266,7 @@ dependencies = [
  "maud",
  "rand 0.9.1",
  "serde",
+ "serde_json",
  "sqlx",
  "tokio",
 ]

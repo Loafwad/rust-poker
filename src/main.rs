@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
             .service(index::index)
             .service(index::deal)
             .service(index::history)
-            .service(index::generate_two_and_compare)
+            .service(index::compare_hands)
     })
     .bind("localhost:8080")
     .expect("Must be able to bind server")
