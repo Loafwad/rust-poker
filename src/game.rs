@@ -1,5 +1,8 @@
 use core::fmt;
-use std::fmt::{Display, Formatter};
+use std::{
+    fmt::{Display, Formatter},
+    str::FromStr,
+};
 
 use actix_web::{Error, error::ErrorInternalServerError};
 use rand::seq::SliceRandom;
@@ -20,15 +23,10 @@ impl Display for Card {
     }
 }
 
-impl Card {
-    /**
-     * E.g "Nine of Hearts", "Ace of Spades", etc.
-     */
-    pub fn to_label(&self) -> String {
-        format!("{:?} of {:?}", self.rank, self.suit)
-    }
+impl FromStr for Card {
+    type Err = Error;
 
-    pub fn from_string(s: &str) -> Result<Card, Error> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.len() != 2 {
             return Err(ErrorInternalServerError("Invalid card string length"));
         }
@@ -59,6 +57,15 @@ impl Card {
         };
 
         Ok(Card { rank, suit })
+    }
+}
+
+impl Card {
+    /**
+     * E.g "Nine of Hearts", "Ace of Spades", etc.
+     */
+    pub fn to_label(&self) -> String {
+        format!("{:?} of {:?}", self.rank, self.suit)
     }
 }
 

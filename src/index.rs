@@ -7,7 +7,7 @@ use actix_web::{
 use maud::{Markup, html};
 use serde::Deserialize;
 use serde_json::json;
-use std::result::Result;
+use std::{result::Result, str::FromStr};
 
 use crate::{
     comparison,
@@ -188,7 +188,7 @@ pub async fn compare_hands(form: Form<CompareReq>) -> Result<Markup, Error> {
 fn parse_hands(hands: Vec<String>) -> Result<Hand, Error> {
     let mut cards: Vec<Card> = Vec::new();
     for card_str in hands {
-        let card = Card::from_string(&card_str)?;
+        let card = Card::from_str(&card_str)?;
         cards.push(card);
     }
     if cards.len() != game::HAND_SIZE {
